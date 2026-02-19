@@ -13,6 +13,7 @@ import numpy as np
 import cv2
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
+import argparse
 
 
 def FindViableNClusters(features_animais_pca):
@@ -44,6 +45,13 @@ def PlotSimilarityMatrix(features, metric):
     plt.show()
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--Elbow", "-E", action="store_true", help="Use essa flag para mostrar o gráfico da inercia / gráfico do cotovelo")
+    parser.add_argument("--Similarity", "-S", action="store_true", help="Use essa flag para mostrar a matrix de similaridade")
+    parser.add_argument("--Dendrogram", "-D", action="store_true")
+    
+    args = parser.parse_args()
+    
     n_clusters = 12
     qntPca = 7
     
@@ -68,15 +76,16 @@ if __name__ == "__main__":
     # cluster = AgglomerativeClustering(n_clusters, metric=cosine_distances,  linkage='average')
     # cluster.fit(fullData)
     
-    FindViableNClusters(TrainData)
-    # PlotSimilarityMatrix(fullData, cosine_distances)
+    if args.Elbow: FindViableNClusters(TrainData)
+    if args.Similarity: PlotSimilarityMatrix(fullData, cosine_distances)
     
-    Z = linkage(fullData, method="average", metric="cosine")
-    
-    plt.figure(figsize=(12,6))
-    dendrogram(Z, labels=fullNames, leaf_rotation=90)
-    plt.title("Dendrograma Facial: Onde o Humano se ramifica?")
-    plt.show()
+    if args.Dendrogram:
+        Z = linkage(fullData, method="average", metric="cosine")
+        
+        plt.figure(figsize=(12,6))
+        dendrogram(Z, labels=fullNames, leaf_rotation=90)
+        plt.title("Dendrograma Facial: Onde o Humano se ramifica?")
+        plt.show()
 
     
     gmm = GaussianMixture(n_components=n_clusters, covariance_type="tied", random_state=42, reg_covar=1e-5, n_init = 10)
