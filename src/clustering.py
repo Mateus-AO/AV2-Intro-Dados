@@ -1,48 +1,17 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import cv2
+import pandas as pd
+import argparse
 from sklearn.cluster import KMeans
-import seaborn as sns
 from utils import load_Dataset
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.mixture import GaussianMixture
 from scipy.cluster.hierarchy import dendrogram, linkage
-from sklearn.cluster import AgglomerativeClustering
-import matplotlib.pyplot as plt
-from Data_Curatiom.utilsStage2 import ProcessImageStage2
 from neural_network import extrair_embedding
 from PCA import usePCA
-import numpy as np
-import cv2
-from sklearn.preprocessing import StandardScaler
-import pandas as pd
-import argparse
-
-
-def FindViableNClusters(features_animais_pca):
-    inercias = []
-    K_range = range(1, 20)
-
-    for k in K_range:
-        km = KMeans(n_clusters=k, random_state=42, n_init=10)
-        km.fit(features_animais_pca)
-        inercias.append(km.inertia_)
-
-    plt.plot(K_range, inercias, 'bx-')
-    plt.xlabel('Número de Clusters (K)')
-    plt.ylabel('Inércia')
-    plt.title('Método do Cotovelo')
-    plt.show()
-
-def PlotSimilarityMatrix(features, metric):
-    plt.figure(figsize=(6,5))
-    sns.heatmap(
-        metric(features),
-        cmap="viridis",
-        vmin=0, vmax=1,      # escala entre 0 e 1
-        xticklabels=1,      # mostra a cada 10 pontos para evitar poluição visual
-        yticklabels=1,
-        square=True          # força a aparencia de quadrado
-    )
-
-    plt.show()
+from utils import FindViableNClusters, PlotSimilarityMatrix
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -76,7 +45,8 @@ if __name__ == "__main__":
     # cluster = AgglomerativeClustering(n_clusters, metric=cosine_distances,  linkage='average')
     # cluster.fit(fullData)
     
-    if args.Elbow: FindViableNClusters(TrainData)
+    if args.Elbow: FindViableNClusters(TrainData, range(1, 100, 5))
+    if args.Elbow: FindViableNClusters(TrainData, range(1, 50, 2))
     if args.Similarity: PlotSimilarityMatrix(fullData, cosine_distances)
     
     if args.Dendrogram:
